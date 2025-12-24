@@ -1,9 +1,9 @@
 // Vercel API Backend Handler
 const vercelTokens = [
-    "8C8mAncpmDBCEteoqUL08WO0",  // Token 1
-    "iMZdXbdEerlvL8oYWphckb7B",  // Token 2  
-    "gvxjCj2AcqdjUwURpaoXhPjd",  // Token 3
-    "55pVAsQhXZ5Yqwo0VGI4W0Me", // Token 4
+    "Eiru24PZqYsn2MpyqpuRBgDz",  // Token 1
+    "HwNrfVWGaYB6kg5GAxHJRMbA",  // Token 2  
+    "TdphcYoMvu0wpxUKoCCxiWEM",  // Token 3
+    "DSVLretuSRZbkPpQCzXSTvdi", // Token 4
     "Vv5QDbKOmtHmlV4sjtodVAUc",  // Token 5
     "iAn8hLCPQrRuslbfKsqRwY7J", // Token 6
     "aR1VKAeeg4cLBWsfg7c8D5qF", // Token 7
